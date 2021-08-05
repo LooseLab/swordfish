@@ -3,13 +3,26 @@ swordfish
 <!-- [![Build](https://github.com/LooseLab/swordfish/actions/workflows/main.yml/badge.svg)](https://github.com/LooseLab/swordfish/actions/workflows/main.yml/badge.svg) -->
 <!-- [![PyPI](https://img.shields.io/pypi/v/swordfish)](https://pypi.org/p/swordfish) -->
 
-swordfish is a demonstration of interaction between [readfish] and [MinoTour].
+swordfish is a demonstration of interaction between [readfish](https://github.com/LooseLab/readfish) and 
+[MinoTour](https://github.com/LooseLab/minotourapp).
 
 
 Installation
 ===
+
 ```bash
 pip install swordfish
+```
+
+or
+
+```bash
+git clone https://github.com/LooseLab/swordfish
+cd swordfish
+python3 -m venv venv
+. ./venv/bin/activate
+pip install -U pip setuptools wheel
+pip install -e .
 ```
 
 Usage
