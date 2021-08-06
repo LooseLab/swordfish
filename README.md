@@ -1,6 +1,6 @@
 swordfish
 =========
-<!-- [![Build](https://github.com/LooseLab/swordfish/actions/workflows/main.yml/badge.svg)](https://github.com/LooseLab/swordfish/actions/workflows/main.yml/badge.svg) -->
+[![Build](https://github.com/LooseLab/swordfish/actions/workflows/main.yml/badge.svg)](https://github.com/LooseLab/swordfish/actions/workflows/main.yml/badge.svg)
 <!-- [![PyPI](https://img.shields.io/pypi/v/swordfish)](https://pypi.org/p/swordfish) -->
 
 swordfish is a demonstration of interaction between [readfish](https://github.com/LooseLab/readfish) and 
