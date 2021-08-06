@@ -25,3 +25,21 @@ def get_device(device, **kws):
         if position.name == device:
             return position
     raise RuntimeError(f"Could not find device {device}")
+
+
+def validate_mt_connection(args, mt_api):
+    """
+    Validate swordfishes connection to minoTour
+    Parameters
+    ----------
+    args: argparse.NameSpace
+        Arguments namespace
+    mt_api: swordfish.minotour_api.MinotourAPI
+        Convience class for querying minoTour
+
+    Returns
+    -------
+    bool:
+        Great success! (or not)
+
+    """
