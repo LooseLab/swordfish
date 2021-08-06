@@ -43,15 +43,22 @@ parser.add_argument(
     type=int,
     help=f"Frequency, in seconds, to poll MinoTour, default: {DEFAULT_FREQ}. Cannot be less than {DEFAULT_FREQ}",
 )
-
+parser.add_argument(
+    "--mt-host",
+    default="localhost",
+    help="Address for connecting to minoTour. Default - localhost"
+)
+parser.add_argument(
+    "--mt-port",
+    default="8100",
+    help="Port for connecting to minotour. Default - 8100.",
+)
 
 def signal_handler(signal, frame):
     print(" Caught Ctrl+C, exiting.", file=sys.stderr)
     sys.exit(0)
 
-
 signal.signal(signal.SIGINT, signal_handler)
-
 
 def main(args=None):
     args = parser.parse_args(args=args)
@@ -93,4 +100,4 @@ def main(args=None):
         sys.exit(msg)
 
     # Call monitor module
-    monitor(args.toml, device, args.mt_key, args.freq)
+    monitor(args.toml, device, args.mt_key, args.freq, args.mt_host, args.mt_port)
