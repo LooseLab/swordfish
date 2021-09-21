@@ -6,6 +6,8 @@ import argparse
 import logging
 import signal
 from pathlib import Path
+import pkg_resources  # part of setuptools
+version = pkg_resources.require("swordfish")[0].version
 
 from swordfish.utils import get_device, print_args
 from swordfish.monitor import monitor
@@ -53,6 +55,14 @@ parser.add_argument(
     default="8100",
     help="Port for connecting to minotour. Default - 8100.",
 )
+parser.add_argument(
+    "--no-minknow",
+    default=False,
+    help="For testing - skips minknow validation. Not recommended."
+         " Will be deprecated in favour of a mock minknow server for testing.",
+    action="store_true"
+)
+
 
 def signal_handler(signal, frame):
     print(" Caught Ctrl+C, exiting.", file=sys.stderr)
@@ -73,8 +83,8 @@ def main(args=None):
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
 
+    logger.info(f"Welcome to Swordfish version {version}. How may we help you today?")
     print_args(args, logger=logger, exclude={"mt_key"})
-
     # Check TOML file
     if not args.toml.is_file():
         sys.exit(f"TOML file not found at {args.toml}")
@@ -87,17 +97,19 @@ def main(args=None):
     if args.freq < DEFAULT_FREQ:
         sys.exit(f"-f/--freq cannot be lower than {DEFAULT_FREQ}")
 
+    device = None
     # Check device
-    try:
-        device = get_device(
-            args.device,
-            host=args.mk_host,
-            port=args.mk_port,
-            use_tls=args.use_tls,
-        )
-    except (RuntimeError, Exception) as e:
-        msg = e.message if hasattr(e, "message") else str(e)
-        sys.exit(msg)
+    if not args.no_minknow:
+        try:
+            device = get_device(
+                args.device,
+                host=args.mk_host,
+                port=args.mk_port,
+                use_tls=args.use_tls,
+            )
+        except (RuntimeError, Exception) as e:
+            msg = e.message if hasattr(e, "message") else str(e)
+            sys.exit(msg)
 
     # Call monitor module
-    monitor(args.toml, device, args.mt_key, args.freq, args.mt_host, args.mt_port)
+    monitor(args.toml, device, args.mt_key, args.freq, args.mt_host, args.mt_port, args.no_minknow, sf_version=version)
