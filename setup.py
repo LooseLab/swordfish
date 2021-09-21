@@ -36,7 +36,7 @@ setup(
         "Topic :: Scientific/Engineering :: Bio-Informatics",
     ],
     python_requires=">=3.6",
-    install_requires=["toml", "minknow-api", "requests"],
+    install_requires=["toml", "minknow-api", "requests", "grpcio"],
     entry_points={
         "console_scripts": [
             "swordfish = swordfish.cli:main",
