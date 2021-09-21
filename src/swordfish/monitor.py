@@ -25,15 +25,15 @@ def monitor(toml_file, position, mt_key, frequency, mt_host, mt_port, no_minknow
         mk_api = position.connect()
         mk_run_information = None
         try:
-            mk_run_information = mk_api.get_current_acquisition_run()
+            mk_run_information = mk_api.acquisition.get_current_acquisition_run()
             # we need this information
             while not mk_run_information:
                 logger.warning("Could not gather current acquistion info. Trying again in 5 seconds....")
-                mk_run_information = mk_api.get_current_acquisition_run()
+                mk_run_information = mk_api.acquisition.get_current_acquisition_run()
                 time.sleep(5)
         except RpcError as e:
             logger.error(repr(e))
-        run_id = mk_run_information.run_id.value
+        run_id = mk_run_information.run_id
     else:
         run_id = "61fe42b9257b07b2c4e3e046aa94a6c827f6befd"
 

@@ -85,6 +85,8 @@ def write_toml_file(data, toml_file_path):
     -------
     None
     """
+    if not str(toml_file_path).endswith("_live"):
+        toml_file_path = f"{toml_file_path}_live"
     with open(toml_file_path, "w") as fh:
         toml.dump(data, fh)
     logger.info(f"Successfully updated toml file at {toml_file_path}")
