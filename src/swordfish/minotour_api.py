@@ -1,7 +1,7 @@
-import gzip
 import json as json_library
 import logging
 from pprint import pformat
+from typing import Tuple
 
 import requests
 
@@ -10,7 +10,7 @@ from requests.packages.urllib3.util.retry import Retry
 
 retry_strategy = Retry(
     total=6,
-    status_forcelist=[429, 502, 503, 504],
+    status_forcelist=[429, 502, 503, 504, 500],
     method_whitelist=["HEAD", "GET", "OPTIONS", "POST"],
     backoff_factor=1,
 )
@@ -25,15 +25,17 @@ log.setLevel(logging.INFO)
 
 class MinotourAPI:
     def __init__(self, host_address, port_number, api_key):
-        self.host_address = host_address
         self.port_number = port_number
         self.request_headers = {
             "Authorization": f"Token {api_key}",
             "Content-Type": "application/json",
             "Content-Encoding": "gzip",
         }
+        self.host_address = host_address
+        self.format_base_url()
 
     def format_base_url(self):
+        # TODO add in check for if the user types http or https
         self.host_address = (
             f"https://{self.host_address}/api/v1/"
             if self.port_number == 443
@@ -76,11 +78,16 @@ class MinotourAPI:
             Expanded keyword arguments
         Returns
         -------
-        str
-            The string data response to the request
+        tuple[int, str]
+            The response status code and the text
 
         """
-        return self._get(*args, **kwargs).text
+
+        resp = self._get(*args, **kwargs)
+        if resp.status_code not in {200, 201, 404}:
+            return log.error(pformat(resp.text))
+        else:
+            return resp.status_code, resp.text
 
     def get_json(self, *args, **kwargs):
         """
@@ -93,13 +100,31 @@ class MinotourAPI:
             Expanded keyword arguments
         Returns
         -------
-        dict or list
+        Tuple[dict, list]
             Json parsed data string
 
         """
         # TODO careful as this may not tells us we have errors
         try:
-            return json_library.loads(self.get(*args, **kwargs))
+            status, text = self.get(*args, **kwargs)
+            print(text)
+            return json_library.loads(text), status
         except json_library.JSONDecodeError as e:
             log.error(repr(e))
-            return ""
+            return None
+
+    def _head(self, endpoint, *args, **kwargs):
+        """
+        Perform a head request to minotour
+        Parameters
+        ----------
+        args
+        kwargs
+
+        Returns
+        -------
+        The response object of the request
+        """
+        url = f"{self.host_address}{endpoint.swordify_url(**kwargs)}"
+        resp = http.head(url, headers=self.request_headers)
+        return resp
