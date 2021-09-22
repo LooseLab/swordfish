@@ -106,8 +106,6 @@ def get_original_toml_settings(toml_file_path):
     """
     with open(toml_file_path, "r") as fh:
         dicty = toml.load(fh)
-    print(dicty)
-    print(dicty.keys())
     keys = {"classified", "unclassified"}
     toml_dict = {"caller_settings": dicty["caller_settings"]}
     # nested dictionary conditions faff
@@ -115,6 +113,5 @@ def get_original_toml_settings(toml_file_path):
     target_conditions = {k: v for k, v in dicty["conditions"].items() if isinstance(v, dict) and k in keys}
     toml_dict["conditions"] = generic_conditions
     toml_dict["conditions"].update(target_conditions)
-    print(toml_dict)
     return toml_dict
 
