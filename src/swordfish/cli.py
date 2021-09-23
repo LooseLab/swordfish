@@ -7,6 +7,7 @@ import logging
 import signal
 from pathlib import Path
 import pkg_resources  # part of setuptools
+
 version = pkg_resources.require("swordfish")[0].version
 
 from swordfish.utils import get_device, print_args
@@ -19,24 +20,16 @@ parser = argparse.ArgumentParser(description="swordfish app")
 parser.add_argument("device", type=str, help="MinION device or GridION position")
 parser.add_argument("toml", type=Path, help="Path to TOML file that will be updated")
 parser.add_argument(
-    "--mt-key",
-    default=None,
-    help="Access token for MinoTour",
+    "--mt-key", default=None, help="Access token for MinoTour",
 )
 parser.add_argument(
-    "--mk-host",
-    default="localhost",
-    help="Address for connecting to MinKNOW",
+    "--mk-host", default="localhost", help="Address for connecting to MinKNOW",
 )
 parser.add_argument(
-    "--mk-port",
-    default=9501,
-    help="Port for connecting to MinKNOW",
+    "--mk-port", default=9501, help="Port for connecting to MinKNOW",
 )
 parser.add_argument(
-    "--use_tls",
-    action="store_true",
-    help="Use TLS for connecting to MinKNOW",
+    "--use_tls", action="store_true", help="Use TLS for connecting to MinKNOW",
 )
 parser.add_argument(
     "-f",
@@ -48,7 +41,7 @@ parser.add_argument(
 parser.add_argument(
     "--mt-host",
     default="localhost",
-    help="Address for connecting to minoTour. Default - localhost"
+    help="Address for connecting to minoTour. Default - localhost",
 )
 parser.add_argument(
     "--mt-port",
@@ -59,8 +52,15 @@ parser.add_argument(
     "--no-minknow",
     default=False,
     help="For testing - skips minknow validation. Not recommended."
-         " Will be deprecated in favour of a mock minknow server for testing.",
-    action="store_true"
+    " Will be deprecated in favour of a mock minknow server for testing.",
+    action="store_true",
+)
+parser.add_argument(
+    "-t",
+    "--threshold",
+    default=50,
+    type=int,
+    help="Threshold X coverage to start unblocking amplicons on a barcode. Default 50. Cannot be less than 20.",
 )
 
 
@@ -68,7 +68,9 @@ def signal_handler(signal, frame):
     print(" Caught Ctrl+C, exiting.", file=sys.stderr)
     sys.exit(0)
 
+
 signal.signal(signal.SIGINT, signal_handler)
+
 
 def main(args=None):
     args = parser.parse_args(args=args)
@@ -97,19 +99,29 @@ def main(args=None):
     if args.freq < DEFAULT_FREQ:
         sys.exit(f"-f/--freq cannot be lower than {DEFAULT_FREQ}")
 
+    if args.threshold > 1000:
+        sys.exit("-t/--threshold cannot be more than 1000")
+
     device = None
     # Check device
     if not args.no_minknow:
         try:
             device = get_device(
-                args.device,
-                host=args.mk_host,
-                port=args.mk_port,
-                use_tls=args.use_tls,
+                args.device, host=args.mk_host, port=args.mk_port, use_tls=args.use_tls,
             )
         except (RuntimeError, Exception) as e:
             msg = e.message if hasattr(e, "message") else str(e)
             sys.exit(msg)
 
     # Call monitor module
-    monitor(args.toml, device, args.mt_key, args.freq, args.mt_host, args.mt_port, args.no_minknow, sf_version=version)
+    monitor(
+        args.toml,
+        device,
+        args.mt_key,
+        args.freq,
+        args.mt_host,
+        args.mt_port,
+        args.no_minknow,
+        args.threshold,
+        sf_version=version,
+    )
