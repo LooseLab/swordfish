@@ -6,9 +6,9 @@ class EndPoint(Enum):
     RUNS = "/reads/runs/{}/"
     VALIDATE_TASK = "/{}/validate/{}"
     TEST = "/test-connect/"
-    GET_COORDS = "/{}/chopchop"
+    GET_COORDS = "/{}/chopchop/{}"
 
-    def swordify_url(self, run_id="", second_slug=""):
+    def swordify_url(self, **kwargs):
         """
         Swordfishify urls, formatting the provided run id into them
         Returns
@@ -17,9 +17,8 @@ class EndPoint(Enum):
             The run id UUID
         """
         # todo switch to list kwargs.values for formatting
-        if second_slug:
-            return f"{self.__class__.SWORDFISH_BASE}{self.value.format(run_id, second_slug)}"
-        return f"{self.__class__.SWORDFISH_BASE}{self.value.format(run_id)}"
+        format_list = [x for x in kwargs]
+        return f"{self.__class__.SWORDFISH_BASE}{self.value.format(format_list)}"
 
     def __str__(self):
         return f"{self.value}"
