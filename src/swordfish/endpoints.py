@@ -16,7 +16,7 @@ class EndPoint(Enum):
         run_id: str
             The run id UUID
         """
-        # todo switch to list kwargs.values for formatting
+        # todo switch some form of validation for number of format params vs number of required params
         format_list = [x for x in kwargs.values()]
         return f"{self.__class__.SWORDFISH_BASE}{self.value.format(*format_list)}"
 
