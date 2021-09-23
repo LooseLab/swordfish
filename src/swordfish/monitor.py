@@ -19,8 +19,35 @@ logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
 
-def monitor(toml_file, position, mt_key, frequency, mt_host, mt_port, no_minknow, sf_version):
-    # Upload initial TOML file
+def monitor(toml_file, position, mt_key, frequency, mt_host, mt_port, threshold, no_minknow, sf_version):
+    """
+    Monitor the ARTIC task amplicons in minoTour
+    Parameters
+    ----------
+    toml_file: pathlib.Path
+        Path to the toml file
+    position: minknow_api.manager.FlowCellPosition
+        The position that the swordfish run is being performed on
+    mt_key: str
+        The uuid API token provided on the minoTour profile details page
+    frequency: int
+        The frequency that we check for updates in minotour at, in seconds
+    mt_host: str
+        Address minotour is hosted at
+    mt_port: int
+        The port that minoTour is accesible on the host at
+    threshold: int
+        The coverage threshold to unblock an amplicon at
+    no_minknow: bool
+        Whether we are using minknow or not. We should be, this is only really for testing
+    sf_version: str
+        The version of swordfish package
+
+    Returns
+    -------
+    None
+    """
+    # Get run id from minknow
     if not no_minknow:
         mk_api = position.connect()
         mk_run_information = None
@@ -61,7 +88,7 @@ def monitor(toml_file, position, mt_key, frequency, mt_host, mt_port, no_minknow
             continue
         # Todo at this point post the original toml
         logger.info("Run information and Artic task found in minoTour. Fetching toml information...")
-        data, status = mt_api.get_json(EndPoint.GET_COORDS, run_id=run_id)
+        data, status = mt_api.get_json(EndPoint.GET_COORDS, run_id=run_id, threshold=threshold)
         if status == 200:
             og_settings_dict["conditions"].update(data)
             write_toml_file(og_settings_dict, toml_file)
