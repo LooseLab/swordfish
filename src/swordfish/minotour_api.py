@@ -85,7 +85,8 @@ class MinotourAPI:
 
         resp = self._get(*args, **kwargs)
         if resp.status_code not in {200, 201, 204, 404}:
-            return log.error(pformat(resp.text))
+            log.error(pformat(resp.text))
+            return resp.status_code, None
         else:
             return resp.status_code, resp.text
 
@@ -110,7 +111,7 @@ class MinotourAPI:
             return json_library.loads(text), status
         except json_library.JSONDecodeError as e:
             log.error(repr(e))
-            return status, text
+            return text, status
 
     def _head(self, endpoint, *args, **kwargs):
         """

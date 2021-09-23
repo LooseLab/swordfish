@@ -62,7 +62,10 @@ def monitor(toml_file, position, mt_key, frequency, mt_host, mt_port, no_minknow
         # Todo at this point post the original toml
         logger.info("Run information and Artic task found in minoTour. Fetching toml information...")
         data, status = mt_api.get_json(EndPoint.GET_COORDS, run_id=run_id)
-        og_settings_dict["conditions"].update(data)
-        write_toml_file(og_settings_dict, toml_file)
+        if status == 200:
+            og_settings_dict["conditions"].update(data)
+            write_toml_file(og_settings_dict, toml_file)
+        elif status == 204:
+            logger.warning(f"No barcode found in minoTour for this ARTIC task. Trying again in {frequency} seconds.")
 
         time.sleep(frequency)
