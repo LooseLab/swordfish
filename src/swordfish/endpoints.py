@@ -17,8 +17,8 @@ class EndPoint(Enum):
             The run id UUID
         """
         # todo switch to list kwargs.values for formatting
-        format_list = [x for x in kwargs]
-        return f"{self.__class__.SWORDFISH_BASE}{self.value.format(format_list)}"
+        format_list = [x for x in kwargs.values()]
+        return f"{self.__class__.SWORDFISH_BASE}{self.value.format(*format_list)}"
 
     def __str__(self):
         return f"{self.value}"

@@ -121,7 +121,7 @@ def main(args=None):
         args.freq,
         args.mt_host,
         args.mt_port,
-        args.no_minknow,
         args.threshold,
+        args.no_minknow,
         sf_version=version,
     )
