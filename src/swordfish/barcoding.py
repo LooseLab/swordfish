@@ -116,6 +116,7 @@ def barcoding_adventure(args, version) -> dict:
     Build your own barcoding adventure! Results not guaranteed
     Returns
     -------
+    # TODO max chunks, simple needs to become setup
     dict
         The dictionary containing the toml json for your barcoding experiment
     pathlib.Path
@@ -180,7 +181,7 @@ def barcoding_adventure(args, version) -> dict:
             "name": f"barcode{barcode_number}",
             "control": False,
             "min_chunks": 0,
-            "max_chunks": 4,
+            "max_chunks": 2,
             "targets": [],
             "single_on": "unblock" if deplete else "stop_receiving",
             "single_off": "stop_receiving",
@@ -279,6 +280,7 @@ def update_barcoding_adventure(args, version):
                 print("Error - Barcode can't be removed, it wasn't in the file.")
         else:
             deplete = dicty["deplete"] == "deplete"
+            multi_map = dicty["multi"] == "Y"
             data["conditions"].update({barcode:{
                     "name": barcode,
                     "control": False,
