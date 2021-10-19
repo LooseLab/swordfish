@@ -78,7 +78,7 @@ def validate_barcode_kit(barcode_kit: str, address: str) -> bool:
 
     """
     try:
-        return True if barcode_kit in get_barcode_kits(address) or not get_barcode_kits(address) else False
+        return True if barcode_kit in get_barcode_kits(address, names=True) or not get_barcode_kits(address) else False
     except RuntimeError as e:
         print(repr(e))
         return True
