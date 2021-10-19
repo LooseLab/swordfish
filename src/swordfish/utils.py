@@ -115,3 +115,24 @@ def get_original_toml_settings(toml_file_path):
     toml_dict["conditions"].update(target_conditions)
     return toml_dict
 
+
+def get_barcode_kits(address, timeout=10000):
+    """
+
+    Parameters
+    ----------
+    address: address for guppy
+    timeout: timeout in milliseconds
+
+    Returns
+    -------
+
+    """
+    # Lazy load GuppyClient for now, we don't want to break this whole module if
+    # it's unavailable
+    from pyguppy_client_lib.client_lib import GuppyClient
+    print(address)
+    res, status = GuppyClient.get_barcode_kits(address, timeout)
+    if status != GuppyClient.success:
+        raise RuntimeError("Could not retrieve barcode kits")
+    return res
