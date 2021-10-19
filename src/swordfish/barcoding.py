@@ -17,7 +17,7 @@ def condition_me(deplete: bool) -> dict:
     dict
         Dictionary of condition
     """
-    depletey = "stop_receiving" if not deplete else "unblock"
+    depletey = "stop_receiving" if deplete else "unblock"
     base_condition = {
         "classified": {
             "name": "classified",
@@ -142,7 +142,7 @@ def barcoding_adventure(args, version) -> dict:
         repeat("Invalid choice, please type one of - Y, N "),
     )
     replies = map(input, prompts)
-    multi_map = bool(next(filter(y_n.__contains__, replies)))
+    multi_map = next(filter(y_n.__contains__, replies))
     print(multi_map)
     multi_map = True if multi_map == "Y" else False
 
