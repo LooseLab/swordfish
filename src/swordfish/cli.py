@@ -8,67 +8,82 @@ import signal
 from pathlib import Path
 import pkg_resources  # part of setuptools
 
-
-from swordfish.barcoding import barcoding_adventure
+from swordfish.barcoding import barcoding_adventure, update_barcoding_adventure
 from swordfish.monitor import monitor
 from swordfish.utils import get_device, print_args
-
-
-version = pkg_resources.require("swordfish")[0].version
 DEFAULT_FREQ = 60
 
+version = pkg_resources.require("swordfish")[0].version
 parser = argparse.ArgumentParser(description="swordfish app")
-parser.add_argument("device", type=str, help="MinION device or GridION position")
-parser.add_argument("toml", type=Path, help="Path to TOML file that will be updated")
-parser.add_argument(
-    "--mt-key", default=None, help="Access token for MinoTour",
-)
-parser.add_argument(
+
+subparsers = parser.add_subparsers(dest='subparser_name', title='subcommands', help='additional help')
+
+parser_simple = subparsers.add_parser("simple", help="create a simple barcode based deplete/enrich experiment TOML.")
+parser_simple.set_defaults(func=barcoding_adventure)
+parser_simple.add_argument("--device", type=str, help="Position sequencing is occuring on - for example X2.")
+parser_simple.add_argument("--toml", type=Path, help="Path to the TOML file.", required=True)
+parser_simple.add_argument("--no-minknow", action="store_true", default=False, help="Do not attempt to use the minknow API")
+parser_simple.add_argument(
     "--mk-host", default="localhost", help="Address for connecting to MinKNOW",
 )
-parser.add_argument(
+parser_simple.add_argument(
     "--mk-port", default=9501, help="Port for connecting to MinKNOW",
 )
-parser.add_argument(
+parser_simple.add_argument(
     "--use_tls", action="store_true", help="Use TLS for connecting to MinKNOW",
 )
-parser.add_argument(
+
+parser_update = subparsers.add_parser("update", help="Update an existing simple toml file by removing or adding barcodes.")
+parser_update.set_defaults(func=update_barcoding_adventure)
+parser_update.add_argument("--toml", required=True, type=Path)
+
+parser_balance = subparsers.add_parser("balance", help="Connect to minoTour and configure a balancing experiment.")
+parser_balance.set_defaults(func=monitor)
+parser_balance.add_argument(
+    "--mt-key", default=None, help="Access token for MinoTour", required=True
+)
+parser_balance.add_argument(
+    "--mk-host", default="localhost", help="Address for connecting to MinKNOW",
+)
+parser_balance.add_argument(
+    "--mk-port", default=9501, help="Port for connecting to MinKNOW",
+)
+parser_balance.add_argument(
+    "--use_tls", action="store_true", help="Use TLS for connecting to MinKNOW",
+)
+parser_balance.add_argument(
     "-f",
     "--freq",
     default=DEFAULT_FREQ,
     type=int,
     help=f"Frequency, in seconds, to poll MinoTour, default: {DEFAULT_FREQ}. Cannot be less than {DEFAULT_FREQ}",
 )
-parser.add_argument(
+parser_balance.add_argument(
     "--mt-host",
     default="localhost",
     help="Address for connecting to minoTour. Default - localhost",
 )
-parser.add_argument(
+parser_balance.add_argument(
     "--mt-port",
     default="8100",
     help="Port for connecting to minotour. Default - 8100.",
 )
-parser.add_argument(
+parser_balance.add_argument(
     "--no-minknow",
     default=False,
     help="For testing - skips minknow validation. Not recommended."
     " Will be deprecated in favour of a mock minknow server for testing.",
     action="store_true",
 )
-parser.add_argument(
+parser_balance.add_argument(
     "-t",
     "--threshold",
     default=50,
     type=int,
     help="Threshold X coverage to start unblocking amplicons on a barcode. Default 50. Cannot be less than 20.",
 )
-parser.add_argument(
-    "--simple",
-    default=False,
-    action="store_true",
-    help="Setup a simple, non-adaptive barcode based experiment, using our handy text based builder!"
-)
+parser_balance.add_argument("--toml", type=Path, required=True, help="Path to TOML file that will be updated")
+parser_balance.add_argument("--device", type=str, required=True, help="MinION device or GridION position")
 
 
 def signal_handler(signal, frame):
@@ -81,7 +96,7 @@ signal.signal(signal.SIGINT, signal_handler)
 
 def main(args=None):
     args = parser.parse_args(args=args)
-
+    print(args)
     formatter = logging.Formatter(
         "[%(asctime)s] %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S"
     )
@@ -91,49 +106,29 @@ def main(args=None):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
-
     logger.info(f"Welcome to Swordfish version {version}. How may we help you today?")
     print_args(args, logger=logger, exclude={"mt_key"})
     # Check TOML file
-    if not args.toml.is_file():
-        sys.exit(f"TOML file not found at {args.toml}")
-
-    # Check MinoTour key is provided
-    if args.mt_key is None and not args.simple:
-        sys.exit("No MinoTour access token provided")
-
-    # Check MinoTour polling frequency
-    if args.freq < DEFAULT_FREQ:
-        sys.exit(f"-f/--freq cannot be lower than {DEFAULT_FREQ}")
-
-    if args.threshold > 1000:
-        sys.exit("-t/--threshold cannot be more than 1000")
-
-    device = None
-    # Check device
-    if not args.no_minknow:
-        try:
-            device = get_device(
-                args.device, host=args.mk_host, port=args.mk_port, use_tls=args.use_tls,
-            )
-        except (RuntimeError, Exception) as e:
-            msg = e.message if hasattr(e, "message") else str(e)
-            sys.exit(msg)
-
     # Call monitor module
-    if not args.simple:
-        monitor(
-            args.toml,
-            device,
-            args.mt_key,
-            args.freq,
-            args.mt_host,
-            args.mt_port,
-            args.threshold,
-            args.no_minknow,
-            sf_version=version,
-        )
+    if args.subparser_name:
+        args.func(args, version)
     else:
-        print(args.toml)
-        barcoding_adventure(args.toml)
+        parser.parse_args("--help")
+    # if not args.simple:
+    #     monitor(
+    #         args.toml,
+    #         device,
+    #         args.mt_key,
+    #         args.freq,
+    #         args.mt_host,
+    #         args.mt_port,
+    #         args.threshold,
+    #         args.no_minknow,
+    #         sf_version=version,
+    #     )
+    # elif not args.update:
+    #     barcoding_adventure(args.toml)
+    # else:
+    #     pass
+
 

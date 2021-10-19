@@ -1,12 +1,14 @@
 import logging
+import sys
 import time
+
 
 from swordfish.endpoints import EndPoint
 from swordfish.minotour_api import MinotourAPI
-from swordfish.utils import validate_mt_connection, write_toml_file, get_original_toml_settings
+from swordfish.utils import validate_mt_connection, write_toml_file, get_original_toml_settings, get_device, get_run_id
 
 from grpc import RpcError
-
+DEFAULT_FREQ = 60
 
 formatter = logging.Formatter(
         "[%(asctime)s] %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S"
@@ -19,7 +21,7 @@ logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
 
-def monitor(toml_file, position, mt_key, frequency, mt_host, mt_port, threshold, no_minknow, sf_version):
+def monitor(args, position, sf_version):
     """
     Monitor the ARTIC task amplicons in minoTour
     Parameters
@@ -48,24 +50,30 @@ def monitor(toml_file, position, mt_key, frequency, mt_host, mt_port, threshold,
     None
     """
     # Get run id from minknow
-    if not no_minknow:
-        mk_api = position.connect()
-        mk_run_information = None
-        try:
-            mk_run_information = mk_api.acquisition.get_current_acquisition_run()
-            # we need this information
-            while not mk_run_information:
-                logger.warning("Could not gather current acquistion info. Trying again in 5 seconds....")
-                mk_run_information = mk_api.acquisition.get_current_acquisition_run()
-                time.sleep(5)
-        except RpcError as e:
-            logger.error(repr(e))
-        run_id = mk_run_information.run_id
-    else:
-        run_id = "61fe42b9257b07b2c4e3e046aa94a6c827f6befd"
+    toml_file = args.toml_file
+    mt_key = args.mt_key
+    frequency = args.freq
+    mt_host = args.mt_host
+    mt_port = args.mt_port
+    threshold = args.threshold
+    no_minknow = args.no_minknow
+    if not args.toml.is_file():
+        sys.exit(f"TOML file not found at {args.toml}")
+
+    # Check MinoTour key is provided
+    if args.mt_key is None and not args.simple:
+        sys.exit("No MinoTour access token provided")
+
+    # Check MinoTour polling frequency
+    if args.freq < DEFAULT_FREQ:
+        sys.exit(f"-f/--freq cannot be lower than {DEFAULT_FREQ}")
+
+    if args.threshold > 1000:
+        sys.exit("-t/--threshold cannot be more than 1000")
 
     mt_api = MinotourAPI(host_address=mt_host, port_number=mt_port, api_key=mt_key)
     validate_mt_connection(mt_api, version=sf_version)
+    run_id = get_run_id(args)
     while True:
         # Polling loop
         # Poll for update

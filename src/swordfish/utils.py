@@ -1,7 +1,10 @@
 """
 Utilities for speaking with MinoTour
 """
+import time
+
 import toml
+from grpc import RpcError
 from minknow_api.manager import Manager
 import logging
 import sys
@@ -116,23 +119,83 @@ def get_original_toml_settings(toml_file_path):
     return toml_dict
 
 
-def get_barcode_kits(address, timeout=10000):
+def get_barcode_kits(address, timeout=10000, names=False):
     """
 
     Parameters
     ----------
     address: address for guppy
     timeout: timeout in milliseconds
-
+    names: bool
+        Name the barcoding kit
     Returns
     -------
 
     """
     # Lazy load GuppyClient for now, we don't want to break this whole module if
     # it's unavailable
-    from pyguppy_client_lib.client_lib import GuppyClient
-    print(address)
-    res, status = GuppyClient.get_barcode_kits(address, timeout)
-    if status != GuppyClient.success:
-        raise RuntimeError("Could not retrieve barcode kits")
-    return res
+    try:
+        from pyguppy_client_lib.client_lib import GuppyClient
+        print(address)
+        res, status = GuppyClient.get_barcode_kits(address, timeout)
+        if status != GuppyClient.success:
+            raise RuntimeError("Could not retrieve barcode kits")
+        if names:
+            res = [barcode["kit_name"] for barcode in res]
+        return res
+    except RuntimeError as e:
+        return []
+
+
+def get_basecalling_configs(position):
+    """
+    Get all bsaecalling configs in minknow
+    Parameters
+    ----------
+    position: minknow_api.Connection
+        The connection to the position on the minkown API
+    Returns
+    -------
+    list
+        List of script names
+    """
+
+def get_run_id(args):
+    """
+    Get the run_id from minknow API
+    Parameters
+    ----------
+    args: argparse.Namespace
+        The argument parser options
+
+    Returns
+    -------
+    str
+        Run id UUid
+    """
+    device = None
+
+    # Check device
+    if not args.no_minknow:
+        try:
+            position = get_device(
+                args.device, host=args.mk_host, port=args.mk_port, use_tls=args.use_tls,
+            )
+        except (RuntimeError, Exception) as e:
+            msg = e.message if hasattr(e, "message") else str(e)
+            sys.exit(msg)
+        mk_api = position.connect()
+        mk_run_information = None
+        try:
+            mk_run_information = mk_api.acquisition.get_current_acquisition_run()
+            # we need this information
+            while not mk_run_information:
+                logger.warning("Could not gather current acquistion info. Trying again in 5 seconds....")
+                mk_run_information = mk_api.acquisition.get_current_acquisition_run()
+                time.sleep(5)
+        except RpcError as e:
+            logger.error(repr(e))
+        run_id = mk_run_information.run_id
+    else:
+        run_id = "61fe42b9257b07b2c4e3e046aa94a6c827f6befd"
+    return run_id
