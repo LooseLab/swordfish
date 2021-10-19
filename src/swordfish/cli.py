@@ -8,12 +8,13 @@ import signal
 from pathlib import Path
 import pkg_resources  # part of setuptools
 
-version = pkg_resources.require("swordfish")[0].version
 
-from swordfish.utils import get_device, print_args
+from swordfish.barcoding import barcoding_adventure
 from swordfish.monitor import monitor
+from swordfish.utils import get_device, print_args
 
 
+version = pkg_resources.require("swordfish")[0].version
 DEFAULT_FREQ = 60
 
 parser = argparse.ArgumentParser(description="swordfish app")
@@ -62,6 +63,12 @@ parser.add_argument(
     type=int,
     help="Threshold X coverage to start unblocking amplicons on a barcode. Default 50. Cannot be less than 20.",
 )
+parser.add_argument(
+    "--simple",
+    default=False,
+    action="store_true",
+    help="Setup a simple, non-adaptive barcode based experiment, using our handy text based builder!"
+)
 
 
 def signal_handler(signal, frame):
@@ -92,7 +99,7 @@ def main(args=None):
         sys.exit(f"TOML file not found at {args.toml}")
 
     # Check MinoTour key is provided
-    if args.mt_key is None:
+    if args.mt_key is None and not args.simple:
         sys.exit("No MinoTour access token provided")
 
     # Check MinoTour polling frequency
@@ -114,14 +121,19 @@ def main(args=None):
             sys.exit(msg)
 
     # Call monitor module
-    monitor(
-        args.toml,
-        device,
-        args.mt_key,
-        args.freq,
-        args.mt_host,
-        args.mt_port,
-        args.threshold,
-        args.no_minknow,
-        sf_version=version,
-    )
+    if not args.simple:
+        monitor(
+            args.toml,
+            device,
+            args.mt_key,
+            args.freq,
+            args.mt_host,
+            args.mt_port,
+            args.threshold,
+            args.no_minknow,
+            sf_version=version,
+        )
+    else:
+        print(args.toml)
+        barcoding_adventure(args.toml)
+
