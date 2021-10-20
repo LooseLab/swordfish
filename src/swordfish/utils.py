@@ -9,14 +9,13 @@ from minknow_api.manager import Manager
 import logging
 import sys
 
+from rich.logging import RichHandler
 from swordfish.endpoints import EndPoint
 
-formatter = logging.Formatter(
-        "[%(asctime)s] %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S"
-    )
-handler = logging.StreamHandler()
-handler.setFormatter(formatter)
-
+# formatter = logging.Formatter(
+#         "[%(asctime)s] %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S"
+#     )
+handler = RichHandler()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
@@ -136,14 +135,14 @@ def get_barcode_kits(address, timeout=10000, names=False):
     # it's unavailable
     try:
         from pyguppy_client_lib.client_lib import GuppyClient
-        print(address)
         res, status = GuppyClient.get_barcode_kits(address, timeout)
         if status != GuppyClient.success:
-            raise RuntimeError("Could not retrieve barcode kits")
+            raise RuntimeError(f"{status}")
         if names:
             res = [barcode["kit_name"] for barcode in res]
         return res
     except RuntimeError as e:
+        logger.error(f"Error fetching barcode kits for validation! {repr(e)}")
         return []
 
 
@@ -159,6 +158,7 @@ def get_basecalling_configs(position):
     list
         List of script names
     """
+
 
 def get_run_id(args):
     """
@@ -197,5 +197,5 @@ def get_run_id(args):
             logger.error(repr(e))
         run_id = mk_run_information.run_id
     else:
-        run_id = "61fe42b9257b07b2c4e3e046aa94a6c827f6befd"
+        run_id = "154c1e8e4818af8cedc080d8ecbe279241e9ddcf"
     return run_id

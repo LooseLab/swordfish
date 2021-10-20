@@ -21,7 +21,7 @@ logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
 
-def monitor(args, position, sf_version):
+def monitor(args, sf_version):
     """
     Monitor the ARTIC task amplicons in minoTour
     Parameters
@@ -50,7 +50,7 @@ def monitor(args, position, sf_version):
     None
     """
     # Get run id from minknow
-    toml_file = args.toml_file
+    toml_file = args.toml
     mt_key = args.mt_key
     frequency = args.freq
     mt_host = args.mt_host

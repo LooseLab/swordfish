@@ -8,6 +8,8 @@ import signal
 from pathlib import Path
 import pkg_resources  # part of setuptools
 
+from rich.logging import RichHandler
+
 from swordfish.barcoding import barcoding_adventure, update_barcoding_adventure
 from swordfish.monitor import monitor
 from swordfish.utils import get_device, print_args
@@ -18,18 +20,18 @@ parser = argparse.ArgumentParser(description="swordfish app")
 
 subparsers = parser.add_subparsers(dest='subparser_name', title='subcommands', help='additional help')
 
-parser_simple = subparsers.add_parser("simple", help="create a simple barcode based deplete/enrich experiment TOML.")
-parser_simple.set_defaults(func=barcoding_adventure)
-parser_simple.add_argument("--device", type=str, help="Position sequencing is occuring on - for example X2.")
-parser_simple.add_argument("--toml", type=Path, help="Path to the TOML file.", required=True)
-parser_simple.add_argument("--no-minknow", action="store_true", default=False, help="Do not attempt to use the minknow API")
-parser_simple.add_argument(
+parser_setup = subparsers.add_parser("setup", help="create a simple barcode based deplete/enrich experiment TOML.")
+parser_setup.set_defaults(func=barcoding_adventure)
+parser_setup.add_argument("--device", type=str, help="Position sequencing is occuring on - for example X2.")
+parser_setup.add_argument("--toml", type=Path, help="Path to the TOML file.", required=True)
+parser_setup.add_argument("--no-minknow", action="store_true", default=False, help="Do not attempt to use the minknow API")
+parser_setup.add_argument(
     "--mk-host", default="localhost", help="Address for connecting to MinKNOW",
 )
-parser_simple.add_argument(
+parser_setup.add_argument(
     "--mk-port", default=9501, help="Port for connecting to MinKNOW",
 )
-parser_simple.add_argument(
+parser_setup.add_argument(
     "--use_tls", action="store_true", help="Use TLS for connecting to MinKNOW",
 )
 
@@ -76,7 +78,6 @@ parser_balance.add_argument(
     action="store_true",
 )
 parser_balance.add_argument(
-    "-t",
     "--threshold",
     default=50,
     type=int,
@@ -100,7 +101,7 @@ def main(args=None):
     formatter = logging.Formatter(
         "[%(asctime)s] %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S"
     )
-    handler = logging.StreamHandler()
+    handler = RichHandler()
     handler.setFormatter(formatter)
 
     logger = logging.getLogger(__name__)

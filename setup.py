@@ -36,10 +36,13 @@ setup(
         "Topic :: Scientific/Engineering :: Bio-Informatics",
     ],
     python_requires=">=3.6",
-    install_requires=["toml", "minknow-api", "requests", "grpcio", "ont-pyguppy-client-lib"],
-    entry_points={
-        "console_scripts": [
-            "swordfish = swordfish.cli:main",
-        ]
-    },
+    install_requires=[
+        "toml",
+        "minknow-api",
+        "requests",
+        "grpcio",
+        "rich",
+        "ont-pyguppy-client-lib",
+    ],
+    entry_points={"console_scripts": ["swordfish = swordfish.cli:main",]},
 )
