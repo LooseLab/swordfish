@@ -12,9 +12,6 @@ import sys
 from rich.logging import RichHandler
 from swordfish.endpoints import EndPoint
 
-# formatter = logging.Formatter(
-#         "[%(asctime)s] %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S"
-#     )
 handler = RichHandler()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -116,48 +113,6 @@ def get_original_toml_settings(toml_file_path):
     toml_dict["conditions"] = generic_conditions
     toml_dict["conditions"].update(target_conditions)
     return toml_dict
-
-
-def get_barcode_kits(address, timeout=10000, names=False):
-    """
-
-    Parameters
-    ----------
-    address: address for guppy
-    timeout: timeout in milliseconds
-    names: bool
-        Name the barcoding kit
-    Returns
-    -------
-
-    """
-    # Lazy load GuppyClient for now, we don't want to break this whole module if
-    # it's unavailable
-    try:
-        from pyguppy_client_lib.client_lib import GuppyClient
-        res, status = GuppyClient.get_barcode_kits(address, timeout)
-        if status != GuppyClient.success:
-            raise RuntimeError(f"{status}")
-        if names:
-            res = [barcode["kit_name"] for barcode in res]
-        return res
-    except RuntimeError as e:
-        logger.error(f"Error fetching barcode kits for validation! {repr(e)}")
-        return []
-
-
-def get_basecalling_configs(position):
-    """
-    Get all bsaecalling configs in minknow
-    Parameters
-    ----------
-    position: minknow_api.Connection
-        The connection to the position on the minkown API
-    Returns
-    -------
-    list
-        List of script names
-    """
 
 
 def get_run_id(args):

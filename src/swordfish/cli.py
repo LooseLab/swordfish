@@ -10,7 +10,6 @@ import pkg_resources  # part of setuptools
 
 from rich.logging import RichHandler
 
-from swordfish.barcoding import barcoding_adventure, update_barcoding_adventure
 from swordfish.monitor import monitor
 from swordfish.utils import get_device, print_args
 DEFAULT_FREQ = 60
@@ -19,25 +18,6 @@ version = pkg_resources.require("swordfish")[0].version
 parser = argparse.ArgumentParser(description="swordfish app")
 
 subparsers = parser.add_subparsers(dest='subparser_name', title='subcommands', help='additional help')
-
-parser_setup = subparsers.add_parser("setup", help="create a simple barcode based deplete/enrich experiment TOML.")
-parser_setup.set_defaults(func=barcoding_adventure)
-parser_setup.add_argument("--device", type=str, help="Position sequencing is occuring on - for example X2.")
-parser_setup.add_argument("--toml", type=Path, help="Path to the TOML file.", required=True)
-parser_setup.add_argument("--no-minknow", action="store_true", default=False, help="Do not attempt to use the minknow API")
-parser_setup.add_argument(
-    "--mk-host", default="localhost", help="Address for connecting to MinKNOW",
-)
-parser_setup.add_argument(
-    "--mk-port", default=9501, help="Port for connecting to MinKNOW",
-)
-parser_setup.add_argument(
-    "--use_tls", action="store_true", help="Use TLS for connecting to MinKNOW",
-)
-
-parser_update = subparsers.add_parser("update", help="Update an existing simple toml file by removing or adding barcodes.")
-parser_update.set_defaults(func=update_barcoding_adventure)
-parser_update.add_argument("--toml", required=True, type=Path)
 
 parser_balance = subparsers.add_parser("balance", help="Connect to minoTour and configure a balancing experiment.")
 parser_balance.set_defaults(func=monitor)
@@ -115,21 +95,3 @@ def main(args=None):
         args.func(args, version)
     else:
         parser.parse_args("--help")
-    # if not args.simple:
-    #     monitor(
-    #         args.toml,
-    #         device,
-    #         args.mt_key,
-    #         args.freq,
-    #         args.mt_host,
-    #         args.mt_port,
-    #         args.threshold,
-    #         args.no_minknow,
-    #         sf_version=version,
-    #     )
-    # elif not args.update:
-    #     barcoding_adventure(args.toml)
-    # else:
-    #     pass
-
-
