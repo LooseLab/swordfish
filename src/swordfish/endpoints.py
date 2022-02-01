@@ -4,9 +4,11 @@ from enum import Enum
 class EndPoint(Enum):
     SWORDFISH_BASE = "/readfish/swordfish"
     RUNS = "/reads/runs/{}/"
-    VALIDATE_TASK = "/{}/validate/{}"
+    VALIDATE_TASK = "/{}/validate/{}/{}"
     TEST = "/test-connect/"
     GET_COORDS = "/{}/chopchop/{}"
+    BREAKPOINTS = "/alignment/breakpoints/{}/{}/{}/{}"
+    TASK_INFO = "/alignment/get_task/{}"
 
     def swordify_url(self, **kwargs):
         """
@@ -17,8 +19,13 @@ class EndPoint(Enum):
             The run id UUID
         """
         # todo switch some form of validation for number of format params vs number of required params
+        swordify = True
+        if "swordify" in kwargs:
+            swordify = kwargs.pop("swordify")
         format_list = [x for x in kwargs.values()]
-        return f"{self.__class__.SWORDFISH_BASE}{self.value.format(*format_list)}"
+        if swordify:
+            return f"{self.__class__.SWORDFISH_BASE}{self.value.format(*format_list)}"
+        return f"{self.value.format(*format_list)}"
 
     def __str__(self):
         return f"{self.value}"
