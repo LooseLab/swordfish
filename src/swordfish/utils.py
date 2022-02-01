@@ -2,6 +2,7 @@
 Utilities for speaking with MinoTour
 """
 import time
+from pathlib import Path
 
 import toml
 from grpc import RpcError
@@ -109,10 +110,11 @@ def get_original_toml_settings(toml_file_path):
     toml_dict = {"caller_settings": dicty["caller_settings"]}
     # nested dictionary conditions faff
     generic_conditions = {k: v for k, v in dicty["conditions"].items() if not isinstance(v, dict)}
-    target_conditions = {k: v for k, v in dicty["conditions"].items() if isinstance(v, dict) and k in keys}
+    base_conditions = {k: v for k, v in dicty["conditions"].items() if isinstance(v, dict) and k in keys}
+    other_conditions = {k: v for k, v in dicty["conditions"].items() if isinstance(v, dict) and k not in keys}
     toml_dict["conditions"] = generic_conditions
-    toml_dict["conditions"].update(target_conditions)
-    return toml_dict
+    toml_dict["conditions"].update(base_conditions)
+    return toml_dict, other_conditions
 
 
 def get_run_id(args):
@@ -152,5 +154,49 @@ def get_run_id(args):
             logger.error(repr(e))
         run_id = mk_run_information.run_id
     else:
-        run_id = "154c1e8e4818af8cedc080d8ecbe279241e9ddcf"
+        run_id = "5b2373109cb9e904f02ce6ffc617e9fa80d5161f"
     return run_id
+
+
+def update_extant_targets(new_data: dict, toml_file_path: Path) -> dict:
+    """
+    Update any barcode we already have in the target TOML file by adding targets in place,
+     so we accrue targets rather than overwrite them.
+    Parameters
+    ----------
+    new_data: dict
+        Data that has been fetched from minoTour this iteration
+    toml_file_path: Path
+        Path to the toml file that will be read
+    Returns
+    -------
+    dict
+        Data to be written to the toml file
+    """
+    _, existing_barcodes = get_original_toml_settings(get_live_toml_file(toml_file_path))
+    for barcode, conditions in new_data.items():
+        if barcode in existing_barcodes:
+            targets = set(existing_barcodes[barcode]["targets"])
+            new_targets = set(conditions["targets"])
+            targets.update(new_targets)
+            new_data[barcode]["targets"] = sorted(list(targets))
+    return new_data
+
+
+def get_live_toml_file(toml_file: Path) -> Path:
+    """
+    Check to see if the TOML file path exists already
+    Parameters
+    ----------
+    toml_file: Path
+        Pathlib Path holding the user provided path to the toml file.
+
+    Returns
+    -------
+    Path
+        path to the live toml file if it exists, else the normal TOML file path
+    """
+    live_file = Path(str(toml_file) + "_live")
+    if live_file.exists():
+        return live_file
+    return toml_file
