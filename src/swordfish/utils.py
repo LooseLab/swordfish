@@ -64,11 +64,11 @@ def validate_mt_connection(mt_api, version):
         sys.exit(f"Unsuccessful connection to minoTour at {resp.url}\nstatus: {resp.status_code}\nreason: {resp.text}")
 
     logger.info(f"Compatible versions {resp.headers['x-sf-version']}")
-
     if version in resp.headers['x-sf-version']:
         logger.info("We have compatibility!")
     else:
-        sys.exit(f"Swordfish version {version} incompatibile with minoTour version {resp.headers['x-mt-version']}")
+        logger.error(f"Swordfish version {version} incompatible with minoTour version {resp.headers['x-mt-version']}")
+        sys.exit(f"BAD! Dead ☠️")
 
 
 def write_toml_file(data, toml_file_path):
