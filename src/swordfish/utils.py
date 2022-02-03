@@ -176,7 +176,7 @@ def update_extant_targets(new_data: dict, toml_file_path: Path) -> dict:
     _, existing_barcodes = get_original_toml_settings(get_live_toml_file(toml_file_path))
     for barcode, conditions in new_data.items():
         if barcode in existing_barcodes:
-            targets = set(existing_barcodes[barcode]["targets"])
+            targets = set(existing_barcodes[barcode].get("targets", []))
             new_targets = set(conditions["targets"])
             targets.update(new_targets)
             new_data[barcode]["targets"] = sorted(list(targets))
