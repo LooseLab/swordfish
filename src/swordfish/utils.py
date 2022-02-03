@@ -177,7 +177,7 @@ def update_extant_targets(new_data: dict, toml_file_path: Path) -> dict:
     for barcode, conditions in new_data.items():
         if barcode in existing_barcodes:
             targets = set(existing_barcodes[barcode].get("targets", []))
-            new_targets = set(conditions["targets"])
+            new_targets = set(conditions.get("targets", []))
             targets.update(new_targets)
             new_data[barcode]["targets"] = sorted(list(targets))
     return new_data
