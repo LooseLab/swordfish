@@ -52,6 +52,7 @@ parser.add_argument(
 parser.add_argument(
     "--mt-port",
     default="8100",
+    type=int,
     help="Port for connecting to minotour. Default - 8100.",
 )
 parser.add_argument("--device", type=str, required=True, help="MinION device or GridION position")
