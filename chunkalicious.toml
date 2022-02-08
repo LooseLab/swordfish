@@ -1,6 +1,6 @@
 [chunk_settings]
 min_chunks = 0
-max_chunks = 100
+max_chunks = 4
 
 [unblock_behaviour]
 single_on = "stop_receiving"
