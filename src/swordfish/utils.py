@@ -3,6 +3,7 @@ Utilities for speaking with MinoTour
 """
 import time
 from pathlib import Path
+from pprint import pformat
 
 import toml
 from grpc import RpcError
@@ -106,7 +107,7 @@ def get_original_toml_settings(toml_file_path):
     """
     with open(toml_file_path, "r") as fh:
         dicty = toml.load(fh)
-    keys = {"classified"}
+    keys = {"classified", "unclassified"}
     toml_dict = {"caller_settings": dicty["caller_settings"]}
     # nested dictionary conditions faff
     generic_conditions = {k: v for k, v in dicty["conditions"].items() if not isinstance(v, dict)}
@@ -154,11 +155,11 @@ def get_run_id(args):
             logger.error(repr(e))
         run_id = mk_run_information.run_id
     else:
-        run_id = "5b2373109cb9e904f02ce6ffc617e9fa80d5161f"
+        run_id = "638c4dea5cd1434a9a5c2ab9edee1e49"
     return run_id
 
 
-def update_extant_targets(new_data: dict, toml_file_path: Path) -> dict:
+def update_extant_targets(new_data: dict, toml_file_path: Path, behaviours: dict) -> dict:
     """
     Update any barcode we already have in the target TOML file by adding targets in place,
      so we accrue targets rather than overwrite them.
@@ -168,6 +169,8 @@ def update_extant_targets(new_data: dict, toml_file_path: Path) -> dict:
         Data that has been fetched from minoTour this iteration
     toml_file_path: Path
         Path to the toml file that will be read
+    behaviours: dict
+        dict containing behaviours as provided
     Returns
     -------
     dict
@@ -180,7 +183,45 @@ def update_extant_targets(new_data: dict, toml_file_path: Path) -> dict:
             new_targets = set(conditions.get("targets", []))
             targets.update(new_targets)
             new_data[barcode]["targets"] = sorted(list(targets))
+        new_data[barcode].update(behaviours["chunk_settings"])
+        new_data[barcode].update(behaviours["unblock_behaviour"])
     return new_data
+
+
+def _check_behaviour_toml(behaviour_toml: Path) -> Path:
+    """
+    Check the behaviour toml provided exists.
+    Parameters
+    ----------
+    behaviour_toml: Path
+        Path to behaviour toml
+    Returns
+    -------
+    Path
+        Absolute Path to the toml file.
+    """
+    if behaviour_toml.exists():
+        return behaviour_toml.resolve()
+    raise FileNotFoundError(behaviour_toml)
+
+
+def _get_preset_behaviours(behaviour_toml: Path) -> dict:
+    """
+    Read the preset behaviours in the behaviour toml to Dict
+
+    Parameters
+    ----------
+    behaviour_toml: Path
+        Path to the behaviour TOML
+    Returns
+    -------
+    dict
+        The behaviour unblocks
+    """
+    toml_path = _check_behaviour_toml(behaviour_toml)
+    behaviours = toml.load(toml_path)
+    logger.info(pformat(behaviours))
+    return behaviours
 
 
 def get_live_toml_file(toml_file: Path) -> Path:
