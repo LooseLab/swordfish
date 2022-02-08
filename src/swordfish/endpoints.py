@@ -19,9 +19,7 @@ class EndPoint(Enum):
             The run id UUID
         """
         # todo switch some form of validation for number of format params vs number of required params
-        swordify = True
-        if "swordify" in kwargs:
-            swordify = kwargs.pop("swordify")
+        swordify = kwargs.pop("swordify") if "swordify" in kwargs else True
         format_list = [x for x in kwargs.values()]
         if swordify:
             return f"{self.__class__.SWORDFISH_BASE}{self.value.format(*format_list)}"
