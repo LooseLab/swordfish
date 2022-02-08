@@ -88,6 +88,15 @@ parser_breakpoints.add_argument(
     type=int,
     help="Expected estimated number of reads to be in a bin. Default 100."
 )
+parser_breakpoints.add_argument(
+    "--behave-toml",
+    required=True,
+    default=Path("chunkalicious.toml"),
+    type=Path,
+    dest="b_toml",
+    help="Path to toml file containing desired behaviour for barcodes on mapping matches, "
+         "and min and max allowed chunk sizes. An example can be found in chunkalicious.toml "
+)
 
 
 def signal_handler(signal, frame):
