@@ -8,7 +8,7 @@ from rich.console import Console
 from swordfish.endpoints import EndPoint
 from swordfish.minotour_api import MinotourAPI
 from swordfish.utils import validate_mt_connection, write_toml_file, get_original_toml_settings, get_device, get_run_id, \
-    update_extant_targets
+    update_extant_targets, _get_preset_behaviours
 
 from grpc import RpcError
 DEFAULT_FREQ = 60
@@ -92,7 +92,7 @@ def monitor(args, sf_version):
         # Polling loop
         # Poll for update
 
-        og_settings_dict, current_targets = get_original_toml_settings(toml_file)
+        og_settings_dict, _ = get_original_toml_settings(toml_file)
         # Check run is present in minoTour
         run_json, status = mt_api.get_json(EndPoint.VALIDATE_TASK, run_id=run_id, second_slug="run", third_slug=args.subparser_name)
         if status == 404:
@@ -113,11 +113,14 @@ def monitor(args, sf_version):
             logger.info("Run information and Artic task found in minoTour. Fetching TOML information...")
             data, status = mt_api.get_json(EndPoint.GET_COORDS, run_id=run_id, threshold=threshold)
         else:
+            # check for behaviours provided, and if there are none, use as provided by minoTour
+            logger.info(f"{args.b_toml} provided for behaviour.")
+            behaviours = _get_preset_behaviours(args.b_toml)
             logger.info("Run information and Minimap + CNV task found in minoTour. Fetching task information...")
             job_master_data, status = mt_api.get_json(EndPoint.TASK_INFO, swordify=False, flowcell_pk=run_json["flowcell"])
             logger.info("Run information and Minimap + CNV task information retrieved. Fetching TOML information...")
             data, status = mt_api.get_json(EndPoint.BREAKPOINTS, swordify=False, job_master_pk=job_master_data["id"], reads_per_bin=reads_per_bin, exp_ploidy=exp_ploidy, min_diff=min_diff)
-            data = update_extant_targets(data, args.toml)
+            data = update_extant_targets(data, args.toml, behaviours)
         if status == 200:
             og_settings_dict["conditions"].update(data)
             write_toml_file(og_settings_dict, toml_file)
