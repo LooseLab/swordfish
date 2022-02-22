@@ -115,10 +115,13 @@ def main(args=None):
     )
     handler = RichHandler()
     handler.setFormatter(formatter)
+    f_handler = logging.FileHandler("swordfish.log")
+    f_handler.setFormatter(formatter)
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
+    logger.addHandler(f_handler)
     logger.info(f"Welcome to Swordfish version {version}. How may we help you today?")
     print_args(args, logger=logger, exclude={"mt_key"})
     # Check TOML file
