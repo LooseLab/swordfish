@@ -1,6 +1,8 @@
 """
 Utilities for speaking with MinoTour
 """
+import json
+from datetime import datetime
 import time
 from pathlib import Path
 from pprint import pformat
@@ -14,10 +16,16 @@ import sys
 from rich.logging import RichHandler
 from swordfish.endpoints import EndPoint
 
+formatter = logging.Formatter(
+        "[%(asctime)s] %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S"
+    )
 handler = RichHandler()
+f_handler = logging.FileHandler("swordfish.log")
+f_handler.setFormatter(formatter)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
+logger.addHandler(f_handler)
 
 
 def print_args(args, logger=None, exclude=None):
@@ -155,7 +163,7 @@ def get_run_id(args):
             logger.error(repr(e))
         run_id = mk_run_information.run_id
     else:
-        run_id = "638c4dea5cd1434a9a5c2ab9edee1e49"
+        run_id = "95db3eca1ce0e424dbc0810075208dda74adb23f"
     return run_id
 
 
@@ -241,3 +249,43 @@ def get_live_toml_file(toml_file: Path) -> Path:
     if live_file.exists():
         return live_file
     return toml_file
+
+
+def create_toml_data_directory(run_name: str) -> Path:
+    """
+    create the directory that we will store our timestamped toml data in
+    Parameters
+    ----------
+    run_name: str
+        The run name
+
+    Returns
+    -------
+    Path
+        The path to the directory that we are writing the data into
+    """
+    directory_path = Path(run_name).resolve()
+    if not directory_path.exists():
+        directory_path.mkdir(exist_ok=True, parents=True)
+    return directory_path
+
+
+def write_out_timestamped_toml(toml_data: dict, directory_path: Path) -> None:
+    """
+    Write out each toml file fetched into a subdirectory
+    Parameters
+    ----------
+    toml_data: dict
+        The toml data dictionary
+    directory_path: Path
+        The path to the directory to write data into
+
+    Returns
+    -------
+    None
+    """
+    toml_data["timestamp"] = datetime.now().isoformat()
+    file_name = datetime.now().isoformat("_", "seconds")
+    with open(directory_path / f"{file_name}.json", "w") as fh:
+        json.dump(toml_data, fh)
+    toml_data.pop("timestamp")
