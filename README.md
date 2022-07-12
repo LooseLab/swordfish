@@ -10,11 +10,6 @@ swordfish is a demonstration of interaction between [readfish](https://github.co
 Installation
 ===
 
-```bash
-pip install swordfish
-```
-
-or
 
 ```bash
 git clone https://github.com/LooseLab/swordfish
