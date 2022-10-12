@@ -6,6 +6,7 @@ from datetime import datetime
 import time
 from pathlib import Path
 from pprint import pformat
+from webbrowser import get
 
 import toml
 from grpc import RpcError
@@ -143,10 +144,13 @@ def get_run_id(args):
 
     # Check device
     if not args.no_minknow:
-        try:
-            position = get_device(
-                args.device, host=args.mk_host, port=args.mk_port, use_tls=args.use_tls,
-            )
+        try:       
+            if minknow_api.__version__.startswith("5"):
+                position = get_device(args.device, host=args.mk_host, port=args.mk_port)
+            elif minknow_api.__version__[:2] in {"4.2", "4.3", "4.4", "4.5"}:
+                position = get_device(
+                    args.device, host=args.mk_host, port=args.mk_port, use_tls=args.use_tls,
+                )
         except (RuntimeError, Exception) as e:
             msg = e.message if hasattr(e, "message") else str(e)
             sys.exit(msg)
