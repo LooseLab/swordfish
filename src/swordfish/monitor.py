@@ -134,6 +134,6 @@ def monitor(args, sf_version):
             write_toml_file(og_settings_dict, toml_file)
 
         elif status == 204:
-            logger.warning(f"No barcode found in minoTour for this ARTIC task. Trying again in {frequency} seconds.")
+            logger.warning(f"No barcodes found in minoTour for this ARTIC task. Trying again in {frequency} seconds.")
 
         time.sleep(frequency)
