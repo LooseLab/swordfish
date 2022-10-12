@@ -10,6 +10,7 @@ from webbrowser import get
 
 import toml
 from grpc import RpcError
+import minknow_api
 from minknow_api.manager import Manager
 import logging
 import sys
