@@ -66,8 +66,8 @@ optional arguments:
 
 Example command:
 ```bash
-swordfish balance --mt-key <MT_API_KEY> --threshold 100 --toml example.toml --mt-port 8100 --mt-host minotour.nottingham.ac.uk --device X2
+swordfish --mt-key <MTKEY> --device X5 --toml example.toml --mt-host minotour.nottingham.ac.uk --mk-port 9502 --mt-port 443 balance --threshold 100
 ```
 
-The above command will query minoTour hosted at _minotour.nottingham.ac.uk_, using the run_id picked up from the minKNOW API for the run on gridION position X2. It will then create a TOML file called example.toml_live,
+The above command will query minoTour hosted at _minotour.nottingham.ac.uk_, using the run_id picked up from the minKNOW API for the run on gridION position X5. It will then create a TOML file called example.toml_live,
 unblocking all amplicons over 100x on barcodes detected by minoTour. The TOML field must be the same as the TOML file path that readfish is using. 
