@@ -38,7 +38,7 @@ subcommands:
 ```
 
 ##Subcommands
-###Balance - balance ARTIC amplicons at a given coverage
+### Balance - balance ARTIC amplicons at a given coverage
 
 ```bash 
 $ swordfish balance --help
