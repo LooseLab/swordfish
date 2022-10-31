@@ -37,7 +37,7 @@ subcommands:
     balance   Connect to minoTour and configure a balancing experiment.
 ```
 
-##Subcommands
+## Subcommands
 ### Balance - balance ARTIC amplicons at a given coverage
 
 ```bash 
