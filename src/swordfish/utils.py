@@ -144,7 +144,7 @@ def get_run_id(args):
     device = None
 
     # Check device
-    if not args.no_minknow:
+    if not args.run_id:
         try:       
             if minknow_api.__version__.startswith("5"):
                 position = get_device(args.device, host=args.mk_host, port=args.mk_port)
@@ -168,7 +168,7 @@ def get_run_id(args):
             logger.error(repr(e))
         run_id = mk_run_information.run_id
     else:
-        run_id = "95db3eca1ce0e424dbc0810075208dda74adb23f"
+        run_id = args.run_id
     return run_id
 
 

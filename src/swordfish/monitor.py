@@ -64,7 +64,7 @@ def monitor(args, sf_version):
     mt_key = args.mt_key
     frequency = args.freq
     mt_host = args.mt_host
-    no_minknow = args.no_minknow
+    run_id = args.run_id
     mt_port = args.mt_port
     artic = True
     if args.subparser_name == "balance":

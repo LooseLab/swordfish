@@ -35,7 +35,7 @@ parser.add_argument(
     "--mk-port", default=9501, help="Port for connecting to MinKNOW",
 )
 parser.add_argument(
-    "--use_tls", action="store_true", help="Use TLS for connecting to MinKNOW",
+    "--use-tls", action="store_true", help="Use TLS for connecting to MinKNOW",
 )
 parser.add_argument(
     "-f",
@@ -58,11 +58,10 @@ parser.add_argument(
 parser.add_argument("--device", type=str, required=True, help="MinION device or GridION position")
 parser.add_argument("--toml", type=Path, required=True, help="Path to TOML file that will be updated")
 parser.add_argument(
-    "--no-minknow",
-    default=False,
+    "--run-id",
+    default="",
     help="For testing - skips minknow validation. Not recommended."
     " Will be deprecated in favour of a mock minknow server for testing.",
-    action="store_true",
 )
 parser_balance.add_argument(
     "--threshold",
