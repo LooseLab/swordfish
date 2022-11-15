@@ -146,12 +146,8 @@ def get_run_id(args):
     # Check device
     if not args.run_id:
         try:       
-            if minknow_api.__version__.startswith("5"):
-                position = get_device(args.device, host=args.mk_host, port=args.mk_port)
-            elif minknow_api.__version__[:2] in {"4.2", "4.3", "4.4", "4.5"}:
-                position = get_device(
-                    args.device, host=args.mk_host, port=args.mk_port, use_tls=args.use_tls,
-                )
+
+            position = get_device(args.device, host=args.mk_host, port=args.mk_port)
         except (RuntimeError, Exception) as e:
             msg = e.message if hasattr(e, "message") else str(e)
             sys.exit(msg)
