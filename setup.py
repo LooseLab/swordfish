@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="swordfish",
-    version="0.0.3",
+    version="0.0.2",
     license="MIT",
     # author="",
     # author_email="",
